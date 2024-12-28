@@ -46,9 +46,6 @@ env:
   REPOSITORY: 'samples' # TODO: update to your Artifact Registry docker repository name
   IMAGE: 'static-site'
   WORKLOAD_IDENTITY_PROVIDER: 'projects/248662578835/locations/global/workloadIdentityPools/my-pool/providers/my-provider' # TODO: update to your workload identity provider
-  CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE: /home/runner/work/CICD-GKE/CICD-GKE/gha-creds-9b42e67f7319ba96.json
-  GOOGLE_APPLICATION_CREDENTIALS: /home/runner/work/CICD-GKE/CICD-GKE/gha-creds-9b42e67f7319ba96.json
-  GOOGLE_GHA_CREDS_PATH: /home/runner/work/CICD-GKE/CICD-GKE/gha-creds-9b42e67f7319ba96.json
 
 
 jobs:
@@ -75,6 +72,7 @@ jobs:
         with:
           workload_identity_provider: 'projects/248662578835/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
           service_account: 'github-action-sa@qwiklabs-gcp-04-a88d3c4778ad.iam.gserviceaccount.com'
+          token_format: 'access_token'
 
 
       # Authenticate Docker to Google Cloud Artifact Registry
