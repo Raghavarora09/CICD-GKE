@@ -1,0 +1,8 @@
+resources:
+  - deployment.yml
+  - service.yml
+
+images:
+  - name: static-site
+    newName: us-central1-docker.pkg.dev/my-project/samples/static-site
+    newTag: latest
