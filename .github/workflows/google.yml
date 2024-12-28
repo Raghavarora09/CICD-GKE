@@ -70,7 +70,7 @@ jobs:
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v2' # google-github-actions/auth@v2
         with:
-          workload_identity_provider: 'projects/248662578835/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+          workload_identity_provider: '${{ env.WORKLOAD_IDENTITY_PROVIDER }}'
           service_account: 'github-action-sa@qwiklabs-gcp-04-a88d3c4778ad.iam.gserviceaccount.com'
           token_format: 'access_token'
 
