@@ -1,0 +1,87 @@
+gcloud services enable container.googleapis.com
+gcloud services enable artifactregistry.googleapis.com
+gcloud services enable cloudresourcemanager.googleapis.com
+gcloud services enable iam.googleapis.com
+
+
+
+gcloud container clusters create cluster-1 \
+    --zone us-central1-a \
+    --machine-type n1-standard-1 \
+    --num-nodes 2
+
+
+
+gcloud artifacts repositories create samples \
+    --repository-format=docker \
+    --location=us-central1 \
+    --description="Docker repository for CI/CD"
+
+
+
+gcloud iam workload-identity-pools create "my-pool" \
+    --location="global" \
+    --display-name="GitHub Actions Pool"
+
+
+
+gcloud iam workload-identity-pools providers create-oidc "my-provider" \
+    --location="global" \
+    --workload-identity-pool="my-pool" \
+    --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
+    --issuer-uri="https://token.actions.githubusercontent.com" \
+    --attribute-condition="assertion.repository=='Raghavarora09/CICD-GKE'"
+
+
+
+# Create service account
+gcloud iam service-accounts create github-action-sa
+
+# Grant required roles
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:github-action-sa@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/container.developer"
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:github-action-sa@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/artifactregistry.writer"
+
+
+
+# Bind the service account to the Workload Identity Pool
+export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
+
+gcloud iam service-accounts add-iam-policy-binding \
+    github-action-sa@$PROJECT_ID.iam.gserviceaccount.com \
+    --role="roles/iam.workloadIdentityUser" \
+    --member="principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/my-pool/*"
+
+
+
+
+#update google.yaml
+
+
+#To get your Workload Identity Provider path, run:
+gcloud iam workload-identity-pools providers describe my-provider \
+    --location="global" \
+    --workload-identity-pool="my-pool" \
+    --format="value(name)"
+
+
+
+#grant role to push docker image
+gcloud projects add-iam-policy-binding qwiklabs-gcp-04-a88d3c4778ad \
+  --member="serviceAccount:github-action-sa@qwiklabs-gcp-04-a88d3c4778ad.iam.gserviceaccount.com" \
+  --role="roles/artifactregistry.writer"
+
+
+##update iam policy roles/artifactregistry.writer
+
+gcloud artifacts repositories add-iam-policy-binding samples \
+  --location=us-central1 \
+  --member="serviceAccount:github-action-sa@qwiklabs-gcp-04-a88d3c4778ad.iam.gserviceaccount.com" \
+  --role="roles/artifactregistry.writer"
+
+	
+
